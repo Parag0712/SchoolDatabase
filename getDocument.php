@@ -13,10 +13,10 @@ function getClassById($conn, $classId)
     // If class exists
     if ($result && $result->num_rows > 0) {
         $classData = $result->fetch_assoc();
-        return ["message" => "Class found", "class" => $classData];
+        return ["message" => "success", "class" => $classData];
     } else {
         // Class not found
-        return ["message" => "Class not found"];
+        return ["message" => "Document not found"];
     }
 }
 

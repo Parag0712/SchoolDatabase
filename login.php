@@ -24,7 +24,7 @@ function loginUser($conn, $data)
         if (password_verify($password, $user['user_password'])) {
             // Password is correct
             unset($user['user_password']); // Remove password from user data
-            return ["message" => "Login successful", "user" => $user];
+            return ["message" => "success", "user" => $user];
         } else {
             // Incorrect password
             return ["message" => "Incorrect password"];

@@ -13,7 +13,7 @@ function getClassById($conn, $userId)
     // If class exists
     if ($result && $result->num_rows > 0) {
         $wallet = $result->fetch_assoc();
-        return ["message" => "Wallet found", "Wallet" => $wallet];
+        return ["message" => "success", "Wallet" => $wallet];
     } else {
         // Class not found
         return ["message" => "User Not Found"];
