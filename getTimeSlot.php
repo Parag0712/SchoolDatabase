@@ -1,0 +1,35 @@
+<?php
+// Include the database connection file
+include './db/db.php';
+
+// Function to fetch all class data
+function getAllClasses($conn)
+{
+    $sql = "SELECT * FROM `time_slot`";
+    $result = $conn->query($sql);
+
+    // Initialize an empty array to store class data
+    $time_slot = [];
+
+    // If there are results, fetch each row and add it to the array
+    if ($result && $result->num_rows > 0) {
+        while ($classData = $result->fetch_assoc()) {
+            $time_slot[] = $classData;
+        }
+    }
+
+    // Return the array of class data
+    return $time_slot;
+}
+
+// Main logic
+if ($_SERVER['REQUEST_METHOD'] === 'GET') {
+    // Fetch all class data
+    $classes = getAllClasses($conn);
+
+    // Send response
+    echo json_encode($classes);
+}
+
+// Close the database connection
+$conn->close();
