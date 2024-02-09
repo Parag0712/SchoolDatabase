@@ -1,48 +1,37 @@
 <?php
 include './db/db.php';
 
-// Function to sanitize data
-function sanitizeData($conn, $data)
-{
-    if (is_array($data)) {
-        foreach ($data as $key => $value) {
-            if (is_array($value)) {
-                $data[$key] = sanitizeData($conn, $value);
-            } else {
-                $data[$key] = mysqli_real_escape_string($conn, $value);
-            }
-        }
-    } else {
-        $data = mysqli_real_escape_string($conn, $data);
-    }
-    return $data;
-}
-
 // Function to register a user
 function registerUser($conn, $data)
 {
-    // Sanitize data
-    $sanitized_data = sanitizeData($conn, $data);
+    // Check if email or user token already exist
+    $email = mysqli_real_escape_string($conn, $data['email']);
+    $userToken = mysqli_real_escape_string($conn, $data['userToken']);
+    $checkSql = "SELECT * FROM `tbl_user` WHERE `user_email` = '$email' OR `user_token` = '$userToken'";
+    $result = $conn->query($checkSql);
+    if ($result->num_rows > 0) {
+        return ["message" => "User with this email or token already exists"];
+    }
 
     // Check for required fields
-    $required_fields = ['username', 'contact', 'email', 'class', 'password','userToken'];
-    foreach ($required_fields as $field) {
-        if (!isset($sanitized_data[$field])) {
+    $requiredFields = ['username', 'contact', 'email', 'class', 'password', 'userToken'];
+    foreach ($requiredFields as $field) {
+        if (!isset($data[$field])) {
             return ["message" => "Missing required field: $field"];
         }
     }
 
     // Set default values if not provided
-    $userStatus = isset($sanitized_data['userStatus']) ? $sanitized_data['userStatus'] : 1;
-    $profileImage = isset($sanitized_data['imgUrl']) ? $sanitized_data['imgUrl'] : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
+    $userStatus = isset($data['userStatus']) ? $data['userStatus'] : 1;
+    $profileImage = isset($data['imgUrl']) ? $data['imgUrl'] : 'https://cdn.pixabay.com/photo/2015/10/05/22/37/blank-profile-picture-973460_1280.png';
 
     // Extract sanitized data
-    $userName = $sanitized_data['username'];
-    $userContact = $sanitized_data['contact'];
-    $userEmail = $sanitized_data['email'];
-    $class = $sanitized_data['class'];
-    $user_token = $sanitized_data['userToken'];
-    $userPassword = password_hash($sanitized_data['password'], PASSWORD_DEFAULT);
+    $userName = mysqli_real_escape_string($conn, $data['username']);
+    $userContact = mysqli_real_escape_string($conn, $data['contact']);
+    $userEmail = mysqli_real_escape_string($conn, $data['email']);
+    $class = mysqli_real_escape_string($conn, $data['class']);
+    $userToken = mysqli_real_escape_string($conn, $data['userToken']);
+    $userPassword = password_hash($data['password'], PASSWORD_DEFAULT);
 
     // Generate random user view password
     $userViewPassword = generateRandomPassword();
@@ -51,17 +40,17 @@ function registerUser($conn, $data)
     $bioData = "";
 
     // Insert data into database
-    $sql = "INSERT INTO `tbl_user` (`profile_image`, `user_name`, `user_contact`, `user_email`, `class`, `user_status`, `user_password`, `user_view_password`, `bio_data`,`user_token`) 
-            VALUES ('$profileImage', '$userName', '$userContact', '$userEmail', '$class', $userStatus, '$userPassword', '$userViewPassword','$bioData' ,'$user_token')";
+    $sql = "INSERT INTO `tbl_user` (`profile_image`, `user_name`, `user_contact`, `user_email`, `class`, `user_status`, `user_password`, `user_view_password`, `bio_data`, `user_token`) 
+            VALUES ('$profileImage', '$userName', '$userContact', '$userEmail', '$class', $userStatus, '$userPassword', '$userViewPassword', '$bioData', '$userToken')";
 
     if ($conn->query($sql) === TRUE) {
         // Fetch inserted user data
-        $user_id = $conn->insert_id;
-        $select_sql = "SELECT `user_id`, `profile_image`, `user_name`, `user_contact`, `user_email`, `class`, `user_status`, `user_view_password`, `bio_data`,`user_token` FROM `tbl_user` WHERE `user_id` = '$user_id'";
-        $result = $conn->query($select_sql);
-        $user_data = $result->fetch_assoc();
+        $userId = $conn->insert_id;
+        $selectSql = "SELECT `user_id`, `profile_image`, `user_name`, `user_contact`, `user_email`, `class`, `user_status`, `user_view_password`, `bio_data`, `user_token` FROM `tbl_user` WHERE `user_id` = '$userId'";
+        $result = $conn->query($selectSql);
+        $userData = $result->fetch_assoc();
 
-        return ["message" => "Success", "user" => $user_data];
+        return ["message" => "Success", "user" => $userData];
     } else {
         return ["message" => "Error: " . $sql . "<br>" . $conn->error];
     }
@@ -91,3 +80,4 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 }
 
 $conn->close();
+?>
