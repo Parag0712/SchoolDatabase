@@ -50,6 +50,8 @@ function registerUser($conn, $data)
         $result = $conn->query($selectSql);
         $userData = $result->fetch_assoc();
 
+        $sql2 = "INSERT INTO `tb_wallet` (`user_id`, `amount`) VALUES ($userId, '0')";
+        $conn->query($sql2);
         return ["message" => "Success", "user" => $userData];
     } else {
         return ["message" => "Error: " . $sql . "<br>" . $conn->error];

@@ -1,13 +1,16 @@
 <?php
 include './db/db.php';
 // Function to fetch class data by ID
-function getClassById($conn, $userToken)
+function getUserData($conn, $userToken)
 {
     // Sanitize class ID
-    $userToken = (int)$userToken;
+    // if (!is_numeric($userToken) || $userToken <= 0) {
+    //     return ["message" => "Invalid user token"];
+    // }
 
+    $userToken = $userToken;
     // Query to fetch class data
-    $sql = "SELECT * FROM `tbl_user` WHERE `user_token` = $userToken";
+    $sql = "SELECT * FROM `tbl_user` WHERE `user_token` = '$userToken'";
     $result = $conn->query($sql);
 
     // If class exists
@@ -16,7 +19,7 @@ function getClassById($conn, $userToken)
         return ["message" => "success", "class" => $userData];
     } else {
         // Class not found
-        return ["message" => "user not found"];
+        return ["message" => "notfound"];
     }
 }
 
@@ -28,7 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
         $userToken = $_GET['user_token'];
 
         // Fetch class data by ID
-        $response = getClassById($conn, $userToken);
+        $response = getUserData($conn, $userToken);
 
         // Send response
         echo json_encode($response);
