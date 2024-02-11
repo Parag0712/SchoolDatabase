@@ -23,44 +23,31 @@ if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
 // Function to update user data
 function updateUser($conn, $data)
 {
-    $required_fields = ['username', 'contact', 'email', 'class', 'imgUrl', 'biodata', 'password'];
+    $required_fields = ['username', 'contact', 'class', 'biodata'];
     foreach ($required_fields as $field) {
         if (!isset($data[$field])) {
             return ["message" => "Missing required field: $field"];
         }
     }
 
-    // Check for existing email
+    // Check for existing contact
     $userId = $_GET['user_id'];
-    $newEmail = $data['email'];
     $newContact = $data['contact'];
-
-    $checkEmailQuery = "SELECT * FROM `tbl_user` WHERE `user_email` = '$newEmail' AND `user_id` != '$userId'";
-    $result = $conn->query($checkEmailQuery);
 
     // Query to check if contact exists for another user
     $checkContactQuery = "SELECT * FROM `tbl_user` WHERE `user_contact` = '$newContact' AND `user_id` != '$userId'";
     $contactResult = $conn->query($checkContactQuery);
-
-    if ($result->num_rows > 0) {
-        // Email already exists for another user
-        return ["message" => "Email already exists"];
-    }
 
     if ($contactResult->num_rows > 0) {
         // Contact already exists for another user
         return ["message" => "Contact already exists"];
     }
 
-    $hashPass = password_hash($data['password'],PASSWORD_DEFAULT);
     // Construct the update query based on the fields provided in $data
     $updateQuery = "UPDATE `tbl_user` SET 
-                `profile_image` = '{$data['imgUrl']}', 
                 `user_name` = '{$data['username']}', 
                 `user_contact` = '{$data['contact']}', 
-                `user_email` = '{$data['email']}', 
                 `class` = '{$data['class']}', 
-                `user_password` = '{$hashPass}', 
                 `bio_data` = '{$data['biodata']}' 
                 WHERE `user_id` = '$userId'";
 
@@ -69,10 +56,10 @@ function updateUser($conn, $data)
         $select_sql = "SELECT * FROM `tbl_user` WHERE `user_id` = '$userId'";
         $result = $conn->query($select_sql);
         $user_data = $result->fetch_assoc();
-        unset($user_data['user_password']);
 
         return ["message" => "User updated successfully", "user" => $user_data];
     } else {
         return ["message" => "Error updating user: " . $conn->error];
     }
 }
+?>
