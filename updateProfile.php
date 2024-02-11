@@ -1,7 +1,7 @@
 <?php
 include './db/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     $data = json_decode(file_get_contents("php://input"), true);
     // Assuming you have a user ID sent in the PATCH request

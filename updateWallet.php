@@ -1,7 +1,7 @@
 <?php
 include './db/db.php';
 
-if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     // Assuming you have authentication and authorization checks before accessing this endpoint
 
     // Get the wallet ID from the URL parameters
@@ -17,7 +17,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'PATCH') {
     $data = json_decode(file_get_contents("php://input"), true);
 
     // Check if the wallet exists
-    $walletExistQuery = "SELECT * FROM `tb_wallet` WHERE `id` = '$walletId'";
+    $walletExistQuery = "SELECT * FROM `tb_wallet` WHERE `user_id` = '$walletId'";
     $walletResult = $conn->query($walletExistQuery);
 
     if ($walletResult->num_rows > 0) {
@@ -46,7 +46,7 @@ function updateWallet($conn, $data, $walletId)
     $amount = mysqli_real_escape_string($conn, $data['amount']);
 
     // Construct the update query
-    $updateQuery = "UPDATE `tb_wallet` SET `amount` = '$amount' WHERE `id` = '$walletId'";
+    $updateQuery = "UPDATE `tb_wallet` SET `amount` = '$amount' WHERE `user_id` = '$walletId'";
 
     // Execute the query
     if ($conn->query($updateQuery) === TRUE) {
