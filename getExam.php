@@ -1,10 +1,20 @@
-<?php 
+<?php
 include './db/db.php';
 
 // Function to fetch questions by class_id and exam_id
-function getQuestionsByClassAndExam($conn, $classId)
+function getQuestionsByClassAndExam($conn, $userId)
 {
-    $sql = "SELECT * FROM `exam_data` WHERE `exam_class` = '$classId'";
+
+
+    $sql = "SELECT
+        exam_data.*,
+        COALESCE(exam_payments.amount_paid, 'NotPaid') AS amount_paid,
+        CASE WHEN exam_payments.amount_paid = 'paid' THEN 'Paid' ELSE 'NotPaid' END AS payment_status
+    FROM
+        exam_data
+    LEFT JOIN
+        exam_payments ON exam_data.exam_id = exam_payments.exam_id AND exam_payments.user_id = '$userId';
+    ";
 
     // Execute the query
     $result = $conn->query($sql);
@@ -26,12 +36,12 @@ function getQuestionsByClassAndExam($conn, $classId)
 // Main logic
 if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     // Check if class_id and exam_id are provided in the request parameters
-    if (isset($_GET['class_id'])) {
+    if (isset($_GET['user_id'])) {
         // Get class_id and exam_id from request parameters
-        $classId = $_GET['class_id'];
+        $userId = $_GET['user_id'];
 
         // Fetch questions by class_id and exam_id
-        $examData = getQuestionsByClassAndExam($conn, $classId);
+        $examData = getQuestionsByClassAndExam($conn, $userId);
 
         // Send response
         echo json_encode($examData);
@@ -42,4 +52,3 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
 }
 // Close the database connection
 $conn->close();
-?>
