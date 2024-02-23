@@ -1,13 +1,13 @@
 <?php
-include './db/db.php';
+include './db/db2.php';
 
 // Function to fetch questions by class_id and exam_id
 function getQuestionsByClassAndExam($conn, $userId)
 {
-
-
+    // Change This Part
     $sql = "SELECT
         exam_data.*,
+        exam_payments.payment_date,
         COALESCE(exam_payments.amount_paid, 'NotPaid') AS amount_paid,
         CASE WHEN exam_payments.amount_paid = 'paid' THEN 'Paid' ELSE 'NotPaid' END AS payment_status
     FROM
@@ -15,6 +15,7 @@ function getQuestionsByClassAndExam($conn, $userId)
     LEFT JOIN
         exam_payments ON exam_data.exam_id = exam_payments.exam_id AND exam_payments.user_id = '$userId';
     ";
+    // Change This Part
 
     // Execute the query
     $result = $conn->query($sql);
